@@ -54,7 +54,7 @@ def home():
             f"/api/v1.0/precipitaton<br/>"
             f"/api/v1.0/tobs<br/>"
             f"/api/v1.0/datesearch/<startDate><br/>"
-            f"/api/v1.0/datesearch/<startDate>/<endDate><br/>"
+            f"/api/v1.0/datesearchRange/<startDate>/<endDate><br/>"
             f"---------------------------------------")
 
 
@@ -92,7 +92,7 @@ def tobs():
 
     return jsonify(TobsData)    
 
-@app.route("/api/v1.0/datesearch/<startDate>")
+@app.route('/api/v1.0/datesearch/<startDate>')
 def start(startDate):
     sel = [Measurement.date, func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)]
 
@@ -111,8 +111,7 @@ def start(startDate):
         dates.append(date_dict)
     return jsonify(dates)
 
-
-@app.route("/api/v1.0/datesearch/<startDate>/<endDate>")
+@app.route('/api/v1.0/datesearchRange/<startDate>/<endDate>')
 def startEnd(startDate, endDate):
     sel = [Measurement.date, func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)]
 
@@ -131,5 +130,7 @@ def startEnd(startDate, endDate):
         date_dict["High Temp"] = result[3]
         dates.append(date_dict)
     return jsonify(dates)
+
+
 if __name__ == "__main__":
     app.run(debug=True)

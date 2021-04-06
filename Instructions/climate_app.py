@@ -41,9 +41,7 @@ latestDay = int(dt.datetime.strftime(latestDate, '%d'))
 
 yearBefore = dt.date(latestYear, latestMonth, latestDay) - dt.timedelta(days=365)
 yearBefore = dt.datetime.strftime(yearBefore, '%Y-%m-%d')
-
-
-
+  
 
 @app.route("/")
 def home():
@@ -81,8 +79,9 @@ def stations():
 
 @app.route("/api/v1.0/tobs")
 def tobs():
+
     results = (session.query(Measurement.date,Measurement.station, Measurement.tobs)
-               .filter(Measurement.date > yearBefore)
+               .filter(Measurement.date > yearBefore, Measurement.station == "USC00519281")
                .order_by(Measurement.date)
                .all())
     TobsData = []
@@ -97,14 +96,13 @@ def start(startDate):
     sel = [Measurement.date, func.min(Measurement.tobs), func.avg(Measurement.tobs), func.max(Measurement.tobs)]
 
     results =  (session.query(*sel)
-                       .filter(func.strftime("%Y-%m-%d", Measurement.date) >= startDate)
+                       .filter(func.strftime("%Y-%m-%d", Measurement.date) == startDate)
                        .group_by(Measurement.date)
                        .all())
 
     dates = []                       
     for result in results:
         date_dict = {}
-        date_dict["Date"] = result[0]
         date_dict["Low Temp"] = result[1]
         date_dict["Avg Temp"] = result[2]
         date_dict["High Temp"] = result[3]
@@ -118,19 +116,16 @@ def startEnd(startDate, endDate):
     results =  (session.query(*sel)
                        .filter(func.strftime("%Y-%m-%d", Measurement.date) >= startDate)
                        .filter(func.strftime("%Y-%m-%d", Measurement.date) <= endDate)
-                       .group_by(Measurement.date)
+                       .order_by(func.avg(Measurement.date))
                        .all())
-
     dates = []                       
     for result in results:
         date_dict = {}
-        date_dict["Date"] = result[0]
         date_dict["Low Temp"] = result[1]
         date_dict["Avg Temp"] = result[2]
         date_dict["High Temp"] = result[3]
         dates.append(date_dict)
     return jsonify(dates)
-
 
 if __name__ == "__main__":
     app.run(debug=True)
